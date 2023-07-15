@@ -4,6 +4,7 @@ import "./styles.css";
 import { DarkModeToggle } from "./components/darkmodetoggle";
 import { NewToDoForm } from "./components/NewToDoForm";
 import { TodoList } from "./components/TodoList";
+import { FooterInfo } from "./components/FooterInfo";
 
 const todosFromStorage = JSON.parse(localStorage.getItem("todos-list") || "[]");
 const isDark = JSON.parse(localStorage.getItem("isDark") || false);
@@ -66,15 +67,12 @@ export default function App() {
   }, [darkMode]);
 
   return (
-    <div className={darkMode ? "dark" : ""}>
+    <div className={`max-h-screen ${darkMode ? "dark" : "" }`}>
       <section className="bg-slate-100 dark:bg-gray-900 min-h-screen transition-all duration-300">
         <div className="flex flex-col items-center justify-center">
-          <h1 className="text-center text-5xl mx-10 mt-10 font-black bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-200 via-violet-600 to-sky-900 bg-clip-text text-transparent duration-700 cursor-pointer select-none">
+          <h1 className="text-center text-5xl mx-10 my-10 font-black bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-200 via-violet-600 to-sky-900 bg-clip-text text-transparent duration-700 cursor-pointer select-none">
             Taskr
           </h1>
-          <h2 className="text-center text-xl mx-10 my-2 font-semibold dark:text-white cursor-default select-none">
-            By Yuki
-          </h2>
           <a onClick={() => setDarkMode(!darkMode)}>
             <DarkModeToggle />
           </a>
@@ -85,6 +83,7 @@ export default function App() {
           toggleTodo={toggleTodo}
           deleteTodo={deleteTodo}
         />
+        <FooterInfo/>
       </section>
     </div>
   );

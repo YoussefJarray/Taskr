@@ -14,8 +14,8 @@ export function TodoItem({
   deleteTodo,
 }) {
   return (
-    <li className="min-w-full md:mr-2 rounded-3xl bg-slate-200 shadow-md dark:bg-slate-800 py-8 px-6 my-2 flex flex-row justify-between">
-      <label className="flex items-center">
+    <li className={`min-w-full md:mr-2 rounded-3xl py-8 px-6 my-2 flex flex-row hover:shadow-xl transition-shadow duration-300 ${completed ? "bg-green-200 shadow-md dark:bg-green-900" : "bg-slate-200 shadow-md dark:bg-slate-800"}`}>
+      <label className="flex">
         <input
           type="checkbox"
           checked={completed}
@@ -30,24 +30,24 @@ export function TodoItem({
           }`}
         ></div>
       </label>
-      <div className="flex flex-col">
+      <div className="flex flex-col ml-0 w-full">
         <p className="text-gray-900 dark:text-white overflow-visible font-medium text-xl">
           {completed && (
             <span className="line-through text-slate-400">{title}</span>
           )}
           {!completed && <span>{title}</span>}
         </p>
-        <p className="text-gray-900 dark:text-slate-300 overflow-visible font-medium text-sm">
+        <p className="text-gray-700 dark:text-slate-300 overflow-visible font-medium text-sm">
           {completed && (
             <span className="line-through text-slate-400">{description}</span>
           )}
           {!completed && <span>{description}</span>}
         </p>
-        <p className="text-gray-900 dark:text-slate-300 overflow-visible font-medium text-sm">
+        <p className="text-gray-700 dark:text-slate-300 overflow-visible font-medium text-sm">
           {completed && (
             <span className="line-through text-slate-400">{capitalizeFirstLetter(priority) + " Priorrity"}</span>
           )}
-          {!completed && <span>{capitalizeFirstLetter(priority) + " Priorrity"}</span>}
+          {!completed && <span>{capitalizeFirstLetter(priority) + " Priority"}</span>}
         </p>
       </div>
       <a className="my-auto rounded-sm p-2" onClick={() => deleteTodo(id)}>
