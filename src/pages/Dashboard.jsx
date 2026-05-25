@@ -63,24 +63,27 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Quick Add ── */}
-      <div className="flex items-center gap-2 p-3.5 rounded-xl border border-subtle bg-surface-card transition-all hover:border-[var(--accent)]/20">
-        <input
-          value={quickTitle}
-          onChange={(e) => setQuickTitle(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleQuickAdd()}
-          placeholder="What needs to be done?"
-          className="flex-1 text-sm bg-transparent border-none focus:outline-none text-primary placeholder-tertiary"
-        />
-        <button
-          onClick={handleQuickAdd}
-          disabled={!quickTitle.trim()}
-          className="flex items-center gap-1 px-4 py-1.5 rounded-lg text-sm font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ backgroundColor: "var(--accent)" }}
-        >
-          <BsPlus className="text-base" /> Add
-        </button>
-      </div>
+       {/* ── Quick Add ── */}
+       <div className="flex items-center gap-2 p-3.5 rounded-xl border border-subtle bg-surface-card transition-all hover:border-[var(--accent)]/20 focus-within:border-[var(--accent)]/50">
+         <input
+           value={quickTitle}
+           onChange={(e) => setQuickTitle(e.target.value)}
+           onKeyDown={(e) => e.key === "Enter" && handleQuickAdd()}
+           placeholder="What needs to be done?"
+           className="flex-1 text-sm bg-transparent border-none focus:outline-none text-primary placeholder-tertiary"
+         />
+         <button
+           onClick={handleQuickAdd}
+           disabled={!quickTitle.trim()}
+           className="flex items-center gap-1 px-4 py-1.5 rounded-lg text-sm font-medium text-white transition-all hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+           style={{ 
+             backgroundColor: "var(--accent)",
+             opacity: !quickTitle.trim() ? 0.5 : 1
+           }}
+         >
+           <BsPlus className="text-base" /> Add
+         </button>
+       </div>
 
       {/* ── Stats Grid ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -129,23 +132,23 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Calendar + Progress + Due Today ── */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* Calendar - grows, min-height */}
-        <div className="flex-1 min-h-[320px]">
-          <Calendar onSelectDate={setSelectedDate} selectedDate={selectedDate} />
-        </div>
+       {/* ── Calendar + Progress + Due Today ── */}
+       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+         {/* Calendar - 3 columns, grows */}
+         <div className="lg:col-span-3">
+           <Calendar onSelectDate={setSelectedDate} selectedDate={selectedDate} />
+         </div>
 
-        {/* Right column - fixed width */}
-        <div className="w-full lg:w-72">
-          {/* Progress */}
-          <div className="rounded-xl p-5 border border-subtle bg-surface-card flex flex-col items-center justify-center">
-            <ProgressBar progress={progress} size={110} strokeWidth={5} />
-            <p className="mt-3 text-xs font-medium text-secondary">Overall progress</p>
-            <p className="text-xs text-tertiary">{completed}/{total} done</p>
-          </div>
-        </div>
-      </div>
+         {/* Right column - 1 column, fixed */}
+         <div className="flex flex-col gap-4">
+           {/* Progress */}
+           <div className="rounded-xl p-5 border border-subtle bg-surface-card flex flex-col items-center justify-center h-full">
+             <ProgressBar progress={progress} size={110} strokeWidth={5} />
+             <p className="mt-3 text-xs font-medium text-secondary">Overall progress</p>
+             <p className="text-xs text-tertiary">{completed}/{total} done</p>
+           </div>
+         </div>
+       </div>
 
       {/* ── Recent Activity ── */}
       <div className="rounded-xl p-5 border border-subtle bg-surface-card">

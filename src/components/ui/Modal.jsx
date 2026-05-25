@@ -14,12 +14,12 @@ export default function Modal({ open, onClose, title, children, wide }) {
 
   if (!open) return null;
 
-  return createPortal(
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
-    >
+   return createPortal(
+     <div
+       ref={overlayRef}
+       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+     >
       <div
         className={`relative w-full shadow-2xl border border-subtle bg-surface-card animate-enter ${
           wide ? "max-w-2xl rounded-2xl p-6" : "max-w-lg rounded-2xl p-6"

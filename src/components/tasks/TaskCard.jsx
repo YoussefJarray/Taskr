@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { RxCheck } from "react-icons/rx";
-import { BsTrash, BsPencil, BsImage, BsArrowUp, BsArrowDown, BsArrowRight, BsCheckCircle, BsThreeDots, BsClock, BsFlag, BsBookmark } from "react-icons/bs";
+import { BsTrash, BsPencil, BsArrowLeft, BsArrowRight, BsArrowUp, BsArrowDown, BsCheckCircle, BsThreeDots, BsClock, BsFlag, BsBookmark } from "react-icons/bs";
 import Modal from "../ui/Modal";
 import ContextMenu from "../ui/ContextMenu";
 import TaskForm from "./TaskForm";
@@ -12,6 +12,7 @@ export default function TaskCard({ task, onToggle, onDelete }) {
   const { updateTask, collections } = useApp();
   const [editing, setEditing] = useState(false);
   const [showImages, setShowImages] = useState(false);
+  const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [ctxMenu, setCtxMenu] = useState(null);
   const p = PRI[task.priority] || PRI.low;
   const col = collections.find((c) => c.id === task.collectionId);
@@ -86,19 +87,49 @@ export default function TaskCard({ task, onToggle, onDelete }) {
               <span className="text-[10px] text-tertiary">{new Date(task.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
             )}
           </div>
-          {task.description && (
-            <p className={`text-xs mt-0.5 ${task.completed ? "line-through text-tertiary" : "text-secondary"}`}>{task.description}</p>
-          )}
+           {task.description && (
+             <p className={`text-xs mt-0.5 ${task.completed ? "line-through text-tertiary" : "text-secondary"}`}>{task.description}</p>
+           )}
+           {/* Image Grid - Carousel only if more than 4 images */}
            {images.length > 0 && (
-             <div className="mt-2">
-               <button onClick={(e) => { e.stopPropagation(); setShowImages(!showImages); }} className="flex items-center gap-1 text-[10px] text-tertiary hover:text-[var(--accent)] transition-colors">
-                 <BsImage /> {images.length} image{images.length > 1 ? "s" : ""}
-               </button>
-               {showImages && (
-                 <div className="flex flex-wrap gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
-                   {images.map((img) => (
-                     <img key={img.id} src={img.dataUrl} alt="" className="w-20 h-20 rounded-lg object-cover border border-subtle hover:border-[var(--accent)] transition-all" />
+             <div className="mt-3">
+               {images.length <= 4 ? (
+                 // Show all images inline
+                 <div className="flex gap-2 flex-wrap">
+                   {images.map((img, idx) => (
+                     <button
+                       key={img.id}
+                       onClick={(e) => { e.stopPropagation(); setShowImages(true); setSelectedImageIdx(idx); }}
+                       className="w-16 h-16 rounded-lg overflow-hidden border border-subtle hover:border-[var(--accent)]/50 transition-all flex items-center justify-center bg-surface-hover"
+                     >
+                       <img src={img.dataUrl} alt="" className="max-w-full max-h-full object-contain" />
+                     </button>
                    ))}
+                 </div>
+               ) : (
+                 // Carousel for more than 4 images
+                 <div className="flex items-center gap-2">
+                   <button
+                     onClick={(e) => { e.stopPropagation(); setSelectedImageIdx(Math.max(0, selectedImageIdx - 1)); }}
+                     disabled={selectedImageIdx === 0}
+                     className="p-1 rounded text-tertiary hover:text-[var(--accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                   >
+                     <BsArrowLeft className="text-sm" />
+                   </button>
+                   <button
+                     onClick={(e) => { e.stopPropagation(); setShowImages(true); }}
+                     className="flex-1 h-24 rounded-lg overflow-hidden border border-subtle hover:border-[var(--accent)]/50 transition-all flex items-center justify-center bg-surface-hover"
+                   >
+                     <img src={images[selectedImageIdx].dataUrl} alt="" className="max-w-full max-h-full object-contain" />
+                   </button>
+                   <button
+                     onClick={(e) => { e.stopPropagation(); setSelectedImageIdx(Math.min(images.length - 1, selectedImageIdx + 1)); }}
+                     disabled={selectedImageIdx === images.length - 1}
+                     className="p-1 rounded text-tertiary hover:text-[var(--accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                   >
+                     <BsArrowRight className="text-sm" />
+                   </button>
+                   <span className="text-[10px] font-medium text-tertiary w-6 text-right">{selectedImageIdx + 1}/{images.length}</span>
                  </div>
                )}
              </div>
@@ -119,12 +150,52 @@ export default function TaskCard({ task, onToggle, onDelete }) {
         </div>
       </div>
 
-      {ctxMenu && <ContextMenu position={ctxMenu} items={ctxItems} onClose={() => setCtxMenu(null)} />}
-      {editing && (
-        <Modal open={editing} onClose={() => setEditing(false)} title="Edit task">
-          <TaskForm collections={collections} initial={task} onSubmit={(data) => { updateTask({ id: task.id, ...data }); setEditing(false); }} onCancel={() => setEditing(false)} />
-        </Modal>
-      )}
+       {ctxMenu && <ContextMenu position={ctxMenu} items={ctxItems} onClose={() => setCtxMenu(null)} />}
+       {editing && (
+         <Modal open={editing} onClose={() => setEditing(false)} title="Edit task">
+           <TaskForm collections={collections} initial={task} onSubmit={(data) => { updateTask({ id: task.id, ...data }); setEditing(false); }} onCancel={() => setEditing(false)} />
+         </Modal>
+       )}
+       {showImages && images.length > 0 && (
+         <Modal open={showImages} onClose={() => setShowImages(false)} title={`Image ${selectedImageIdx + 1} of ${images.length}`} wide>
+           <div className="space-y-4">
+             <div className="flex items-center justify-center bg-surface-secondary rounded-lg overflow-hidden w-full h-96">
+               <img src={images[selectedImageIdx].dataUrl} alt="" className="max-w-full max-h-full object-contain" />
+             </div>
+             <div className="flex gap-2 justify-between">
+               <div className="flex gap-1 flex-wrap">
+                 {images.map((img, idx) => (
+                   <button
+                     key={img.id}
+                     onClick={() => setSelectedImageIdx(idx)}
+                     className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                       selectedImageIdx === idx ? "border-[var(--accent)]" : "border-subtle hover:border-[var(--accent)]/50"
+                     }`}
+                   >
+                     <img src={img.dataUrl} alt="" className="w-full h-full object-cover" />
+                   </button>
+                 ))}
+               </div>
+               <div className="flex gap-2">
+                 <button
+                   onClick={() => setSelectedImageIdx(Math.max(0, selectedImageIdx - 1))}
+                   disabled={selectedImageIdx === 0}
+                   className="px-3 py-2 rounded-lg text-sm font-medium border border-subtle hover:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                 >
+                   ← Prev
+                 </button>
+                 <button
+                   onClick={() => setSelectedImageIdx(Math.min(images.length - 1, selectedImageIdx + 1))}
+                   disabled={selectedImageIdx === images.length - 1}
+                   className="px-3 py-2 rounded-lg text-sm font-medium border border-subtle hover:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                 >
+                   Next →
+                 </button>
+               </div>
+             </div>
+           </div>
+         </Modal>
+       )}
     </>
   );
 }

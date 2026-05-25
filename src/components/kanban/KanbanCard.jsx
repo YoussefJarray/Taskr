@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useApp } from "../../context/AppContext";
 import ContextMenu from "../ui/ContextMenu";
-import { BsTrash, BsPencil, BsImage, BsArrowUp, BsArrowDown, BsArrowRight, BsCheckCircle, BsClock, BsFlag, BsBookmark, BsThreeDots } from "react-icons/bs";
+import Modal from "../ui/Modal";
+import { BsTrash, BsPencil, BsArrowLeft, BsArrowDown, BsArrowRight, BsCheckCircle, BsClock, BsFlag, BsBookmark, BsThreeDots, BsArrowUp } from "react-icons/bs";
 
 const PRI = { high: "#f43f5e", moderate: "#f59e0b", low: "#10b981" };
 
 export default function KanbanCard({ task, isDragging, onEdit }) {
   const { deleteTask, updateTask, collections } = useApp();
   const [ctxMenu, setCtxMenu] = useState(null);
+  const [showImages, setShowImages] = useState(false);
+  const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const col = collections.find((c) => c.id === task.collectionId);
   const p = PRI[task.priority] || PRI.low;
   const images = task.images || [];
@@ -60,12 +63,48 @@ export default function KanbanCard({ task, isDragging, onEdit }) {
               {task.title || "Untitled"}
             </p>
             {task.description && <p className="text-[11px] text-secondary mt-0.5 truncate">{task.description}</p>}
+             {/* Image Grid - Carousel only if more than 3 images */}
              {images.length > 0 && (
-               <div className="flex gap-1.5 mt-2">
-                 {images.slice(0, 3).map((img) => (
-                   <img key={img.id} src={img.dataUrl} alt="" className="w-10 h-10 rounded-md object-cover border border-subtle hover:border-[var(--accent)] transition-all" />
-                 ))}
-                 {images.length > 3 && <span className="text-[10px] text-tertiary self-center">+{images.length - 3}</span>}
+               <div className="mt-2">
+                 {images.length <= 3 ? (
+                   // Show all images inline
+                   <div className="flex gap-1.5">
+                     {images.map((img, idx) => (
+                       <button
+                         key={img.id}
+                         onClick={(e) => { e.stopPropagation(); setShowImages(true); setSelectedImageIdx(idx); }}
+                         className="w-14 h-14 rounded-lg overflow-hidden border border-subtle hover:border-[var(--accent)]/50 transition-all flex items-center justify-center bg-surface-hover"
+                       >
+                         <img src={img.dataUrl} alt="" className="max-w-full max-h-full object-contain" />
+                       </button>
+                     ))}
+                   </div>
+                 ) : (
+                   // Carousel for more than 3 images
+                   <div className="flex items-center gap-1.5">
+                     <button
+                       onClick={(e) => { e.stopPropagation(); setSelectedImageIdx(Math.max(0, selectedImageIdx - 1)); }}
+                       disabled={selectedImageIdx === 0}
+                       className="p-0.5 rounded text-tertiary hover:text-[var(--accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                     >
+                       <BsArrowLeft className="text-xs" />
+                     </button>
+                     <button
+                       onClick={(e) => { e.stopPropagation(); setShowImages(true); }}
+                       className="w-16 h-16 rounded-lg overflow-hidden border border-subtle hover:border-[var(--accent)]/50 transition-all flex items-center justify-center bg-surface-hover"
+                     >
+                       <img src={images[selectedImageIdx].dataUrl} alt="" className="max-w-full max-h-full object-contain" />
+                     </button>
+                     <button
+                       onClick={(e) => { e.stopPropagation(); setSelectedImageIdx(Math.min(images.length - 1, selectedImageIdx + 1)); }}
+                       disabled={selectedImageIdx === images.length - 1}
+                       className="p-0.5 rounded text-tertiary hover:text-[var(--accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                     >
+                       <BsArrowRight className="text-xs" />
+                     </button>
+                     <span className="text-[10px] font-medium text-tertiary w-7">{selectedImageIdx + 1}/{images.length}</span>
+                   </div>
+                 )}
                </div>
              )}
           </div>
@@ -80,17 +119,54 @@ export default function KanbanCard({ task, isDragging, onEdit }) {
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${p}18`, color: p }}>
             {task.priority === "high" ? "High" : task.priority === "moderate" ? "Med" : "Low"}
           </span>
-          {col && (
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${col.color}18`, color: col.color }}>
-              {col.name}
-            </span>
-          )}
-          {images.length > 0 && (
-            <span className="flex items-center gap-0.5 text-[10px] text-tertiary"><BsImage /> {images.length}</span>
-          )}
+           {col && (
+             <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${col.color}18`, color: col.color }}>
+               {col.name}
+             </span>
+           )}
         </div>
-      </div>
-      {ctxMenu && <ContextMenu position={ctxMenu} items={ctxItems} onClose={() => setCtxMenu(null)} />}
+       </div>
+       {ctxMenu && <ContextMenu position={ctxMenu} items={ctxItems} onClose={() => setCtxMenu(null)} />}
+       {showImages && images.length > 0 && (
+         <Modal open={showImages} onClose={() => setShowImages(false)} title={`Image ${selectedImageIdx + 1} of ${images.length}`} wide>
+           <div className="space-y-4">
+             <div className="flex items-center justify-center bg-surface-secondary rounded-lg overflow-hidden w-full h-80">
+               <img src={images[selectedImageIdx].dataUrl} alt="" className="max-w-full max-h-full object-contain" />
+             </div>
+             <div className="flex gap-2 justify-between">
+               <div className="flex gap-1 flex-wrap">
+                 {images.map((img, idx) => (
+                   <button
+                     key={img.id}
+                     onClick={() => setSelectedImageIdx(idx)}
+                     className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                       selectedImageIdx === idx ? "border-[var(--accent)]" : "border-subtle hover:border-[var(--accent)]/50"
+                     }`}
+                   >
+                     <img src={img.dataUrl} alt="" className="w-full h-full object-cover" />
+                   </button>
+                 ))}
+               </div>
+               <div className="flex gap-2">
+                 <button
+                   onClick={() => setSelectedImageIdx(Math.max(0, selectedImageIdx - 1))}
+                   disabled={selectedImageIdx === 0}
+                   className="px-3 py-2 rounded-lg text-sm font-medium border border-subtle hover:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                 >
+                   ← Prev
+                 </button>
+                 <button
+                   onClick={() => setSelectedImageIdx(Math.min(images.length - 1, selectedImageIdx + 1))}
+                   disabled={selectedImageIdx === images.length - 1}
+                   className="px-3 py-2 rounded-lg text-sm font-medium border border-subtle hover:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                 >
+                   Next →
+                 </button>
+               </div>
+             </div>
+           </div>
+         </Modal>
+       )}
     </>
   );
 }

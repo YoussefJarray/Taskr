@@ -57,41 +57,71 @@ export default function MoodBoard() {
     setShowForm(false);
   }, [addMoodImage]);
 
-  const handleMouseDown = useCallback((e, img) => {
-    e.preventDefault();
-    if (resizingId) return;
-    setDraggingId(img.id);
-    const board = e.currentTarget.closest("[data-board]");
-    if (!board) return;
-    const el = board.querySelector(`[data-img-id="${img.id}"]`);
-    if (!el) return;
+   const handleMouseDown = useCallback((e, img) => {
+     e.preventDefault();
+     if (resizingId) return;
+     setDraggingId(img.id);
+     const board = e.currentTarget.closest("[data-board]");
+     if (!board) return;
+     const el = board.querySelector(`[data-img-id="${img.id}"]`);
+     if (!el) return;
 
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const origLeft = parseFloat(el.style.left) || img.x;
-    const origTop = parseFloat(el.style.top) || img.y;
+     const startX = e.clientX;
+     const startY = e.clientY;
+     const origLeft = parseFloat(el.style.left) || img.x;
+     const origTop = parseFloat(el.style.top) || img.y;
 
-    const move = (ev) => {
-      el.style.left = `${origLeft + ev.clientX - startX}px`;
-      el.style.top = `${origTop + ev.clientY - startY}px`;
-      el.style.zIndex = maxZIndex + 100;
-    };
+     // Store original z-indexes of all images
+     const originalZIndexes = {};
+     moodImages.forEach((moodImg) => {
+       originalZIndexes[moodImg.id] = moodImg.zIndex || 0;
+     });
 
-    const up = () => {
-      window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseup", up);
-      setDraggingId(null);
-      const finalLeft = parseFloat(el.style.left) || origLeft;
-      const finalTop = parseFloat(el.style.top) || origTop;
-      const dx = finalLeft - img.x, dy = finalTop - img.y;
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        updateMoodImage({ id: img.id, x: Math.max(0, finalLeft), y: Math.max(0, finalTop), zIndex: maxZIndex + 100 });
-      }
-    };
+     const move = (ev) => {
+       el.style.left = `${origLeft + ev.clientX - startX}px`;
+       el.style.top = `${origTop + ev.clientY - startY}px`;
+       
+       // Find the highest z-index among all images
+       const maxZ = Math.max(...Object.values(originalZIndexes), 0);
+       
+       // Set dragged image to max + 100 (but keep it below modal z-index of 9999)
+       el.style.zIndex = Math.min(maxZ + 100, 9000);
+       
+       // All other images keep their relative z-index order
+       moodImages.forEach((otherImg) => {
+         if (otherImg.id !== img.id) {
+           const otherEl = board.querySelector(`[data-img-id="${otherImg.id}"]`);
+           if (otherEl) {
+             otherEl.style.zIndex = otherImg.zIndex || 0;
+           }
+         }
+       });
+     };
 
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", up);
-  }, [updateMoodImage, resizingId]);
+      const up = () => {
+        window.removeEventListener("mousemove", move);
+        window.removeEventListener("mouseup", up);
+        setDraggingId(null);
+        
+        const finalLeft = parseFloat(el.style.left) || origLeft;
+        const finalTop = parseFloat(el.style.top) || origTop;
+        const dx = finalLeft - img.x, dy = finalTop - img.y;
+        
+        // Find the highest z-index to keep dragged image on top
+        const maxZ = Math.max(...Object.values(originalZIndexes), 0);
+        
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+          // Position changed, update both position and z-index
+          updateMoodImage({ id: img.id, x: Math.max(0, finalLeft), y: Math.max(0, finalTop), zIndex: maxZ + 50 });
+        } else {
+          // Position barely changed, but still update z-index to bring image to front
+          updateMoodImage({ id: img.id, zIndex: maxZ + 50 });
+        }
+      };
+
+     window.addEventListener("mousemove", move);
+     window.addEventListener("mouseup", up);
+   }, [updateMoodImage, resizingId, moodImages]);
 
   const handleResizeStart = useCallback((e, img) => {
     e.preventDefault();
@@ -193,11 +223,12 @@ export default function MoodBoard() {
                  setSelectedId(img.id);
                  handleMouseDown(e, img);
                }}
-               onClick={(e) => {
-                 e.stopPropagation();
-                 setSelectedId(img.id);
-                 updateMoodImage({ id: img.id, zIndex: maxZIndex + 100 });
-               }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(img.id);
+                  const maxZ = Math.max(...moodImages.map(i => i.zIndex || 0), 0);
+                  updateMoodImage({ id: img.id, zIndex: maxZ + 1 });
+                }}
             >
               {(img.url.startsWith("data:") || img.url.startsWith("http")) ? (
                 <img
