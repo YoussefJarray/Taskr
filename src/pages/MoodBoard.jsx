@@ -36,7 +36,11 @@ export default function MoodBoard() {
   const [editTitle, setEditTitle] = useState("");
   const [draggingId, setDraggingId] = useState(null);
   const [resizingId, setResizingId] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
   const dragRef = useRef(null);
+
+  // Track highest z-index for layering
+  const maxZIndex = Math.max(...moodImages.map(img => img.zIndex || 0), 0);
 
   const handleUpload = useCallback(async (files) => {
     for (const f of files) {
@@ -70,7 +74,7 @@ export default function MoodBoard() {
     const move = (ev) => {
       el.style.left = `${origLeft + ev.clientX - startX}px`;
       el.style.top = `${origTop + ev.clientY - startY}px`;
-      el.style.zIndex = 10;
+      el.style.zIndex = maxZIndex + 100;
     };
 
     const up = () => {
@@ -81,7 +85,7 @@ export default function MoodBoard() {
       const finalTop = parseFloat(el.style.top) || origTop;
       const dx = finalLeft - img.x, dy = finalTop - img.y;
       if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        updateMoodImage({ id: img.id, x: Math.max(0, finalLeft), y: Math.max(0, finalTop) });
+        updateMoodImage({ id: img.id, x: Math.max(0, finalLeft), y: Math.max(0, finalTop), zIndex: maxZIndex + 100 });
       }
     };
 
@@ -161,27 +165,39 @@ export default function MoodBoard() {
           <p className="text-sm font-medium text-secondary">No images yet</p>
           <p className="text-xs mt-1">Drop images anywhere or use the button above</p>
         </div>
-      ) : (
-        <div
-          data-board
-          className="flex-1 relative border-2 border-dashed border-subtle rounded-2xl min-h-[500px] overflow-hidden bg-surface-secondary/30"
-        >
-          {moodImages.map((img) => (
-            <div
-              key={img.id}
-              data-img-id={img.id}
-              className={`absolute group rounded-lg overflow-hidden border shadow-md transition-shadow ${
-                draggingId === img.id ? "shadow-xl cursor-grabbing" : "hover:shadow-lg"
-              } ${resizingId === img.id ? "select-none" : ""}`}
-              style={{
-                left: img.x,
-                top: img.y,
-                width: img.width,
-                height: img.height,
-                borderColor: "var(--border-subtle)",
-                cursor: draggingId === img.id ? "grabbing" : "grab",
-              }}
-              onMouseDown={(e) => handleMouseDown(e, img)}
+       ) : (
+         <div
+           data-board
+           className="flex-1 relative border-2 border-dashed border-subtle rounded-2xl min-h-[500px] overflow-hidden bg-surface-secondary/30"
+           onClick={() => setSelectedId(null)}
+         >
+           {moodImages.map((img) => (
+             <div
+               key={img.id}
+               data-img-id={img.id}
+               className={`absolute group rounded-lg overflow-hidden border shadow-md transition-shadow ${
+                 draggingId === img.id ? "shadow-xl cursor-grabbing" : "hover:shadow-lg"
+               } ${resizingId === img.id ? "select-none" : ""} ${
+                 selectedId === img.id ? "ring-2 ring-[var(--accent)] ring-offset-2" : ""
+               }`}
+               style={{
+                 left: img.x,
+                 top: img.y,
+                 width: img.width,
+                 height: img.height,
+                 borderColor: "var(--border-subtle)",
+                 cursor: draggingId === img.id ? "grabbing" : "grab",
+                 zIndex: img.zIndex || 1,
+               }}
+               onMouseDown={(e) => {
+                 setSelectedId(img.id);
+                 handleMouseDown(e, img);
+               }}
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setSelectedId(img.id);
+                 updateMoodImage({ id: img.id, zIndex: maxZIndex + 100 });
+               }}
             >
               {(img.url.startsWith("data:") || img.url.startsWith("http")) ? (
                 <img

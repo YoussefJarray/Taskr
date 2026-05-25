@@ -1,14 +1,16 @@
 import { useApp } from "../context/AppContext";
-import { BsSun, BsMoon, BsBrightnessHigh, BsStar, BsExclamationTriangle, BsFlower1, BsDroplet } from "react-icons/bs";
+import { BsSun, BsMoon, BsBrightnessHigh, BsStar, BsExclamationTriangle, BsFlower1, BsDroplet, BsCircleHalf, BsFire } from "react-icons/bs";
 import { useState } from "react";
 
 const THEMES = [
   { id: "light", label: "Light", desc: "Clean white", icon: BsSun, accent: "#8B5CF6", bg: "#ffffff", text: "#111827" },
   { id: "warm", label: "Warm", desc: "Amber warmth", icon: BsBrightnessHigh, accent: "#D97706", bg: "#FEFCF5", text: "#3D3222" },
   { id: "rose", label: "Rose", desc: "Soft pink glow", icon: BsFlower1, accent: "#D6336C", bg: "#fef7f7", text: "#3D2028" },
+  { id: "ocean", label: "Ocean", desc: "Cyan depths", icon: BsCircleHalf, accent: "#0284c7", bg: "#f0f9fc", text: "#082f49" },
   { id: "dark", label: "Midnight", desc: "Deep blue", icon: BsMoon, accent: "#8B5CF6", bg: "#13132B", text: "#f1f1f1" },
   { id: "deep-purple", label: "Deep Purple", desc: "Rich violet", icon: BsStar, accent: "#A78BFA", bg: "#1E1040", text: "#f1e8ff" },
   { id: "emerald", label: "Emerald", desc: "Green depths", icon: BsDroplet, accent: "#34D399", bg: "#0f2a1e", text: "#e8fff0" },
+  { id: "sunset", label: "Sunset", desc: "Warm glow", icon: BsFire, accent: "#ff8c4a", bg: "#2d1f18", text: "#ffe8d0" },
 ];
 
 export default function Settings() {
@@ -29,35 +31,35 @@ export default function Settings() {
         <p className="text-sm text-secondary mt-0.5">Customize your experience</p>
       </div>
 
-      {/* Theme selector */}
-      <section className="rounded-xl border border-subtle bg-surface-card p-5">
-        <h2 className="text-sm font-semibold text-primary mb-3">Theme</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {THEMES.map((t) => {
-            const Icon = t.icon;
-            const active = theme === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setTheme(t.id)}
-                className={`relative rounded-xl p-3 border-2 transition-all text-left ${
-                  active
-                    ? "border-[var(--accent)] shadow-md"
-                    : "border-transparent hover:border-[var(--border-default)]"
-                }`}
-                style={{ backgroundColor: t.bg, color: t.text, borderColor: active ? t.accent : undefined }}
-              >
-                {active && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ backgroundColor: t.accent }} />
-                )}
-                <Icon className="text-lg mb-1.5" style={{ color: t.accent }} />
-                <p className="text-xs font-semibold">{t.label}</p>
-                <p className="text-[10px] opacity-60 mt-0.5">{t.desc}</p>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+       {/* Theme selector */}
+       <section className="rounded-xl border border-subtle bg-surface-card p-5">
+         <h2 className="text-sm font-semibold text-primary mb-3">Theme</h2>
+         <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+           {THEMES.map((t) => {
+             const Icon = t.icon;
+             const active = theme === t.id;
+             return (
+               <button
+                 key={t.id}
+                 onClick={() => setTheme(t.id)}
+                 className={`relative rounded-lg p-2.5 border-2 transition-all text-center ${
+                   active
+                     ? "border-[var(--accent)] shadow-md"
+                     : "border-transparent hover:border-[var(--border-default)]"
+                 }`}
+                 style={{ backgroundColor: t.bg, color: t.text, borderColor: active ? t.accent : undefined }}
+                 title={t.label}
+               >
+                 {active && (
+                   <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: t.accent }} />
+                 )}
+                 <Icon className="text-base mb-1" style={{ color: t.accent, margin: "0 auto" }} />
+                 <p className="text-[10px] font-semibold truncate">{t.label}</p>
+               </button>
+             );
+           })}
+         </div>
+       </section>
 
       {/* Storage stats */}
       <section className="rounded-xl border border-subtle bg-surface-card p-5">

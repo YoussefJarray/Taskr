@@ -85,7 +85,17 @@ export default function Kanban() {
     const allTasks = [...tasks];
     const idx = allTasks.findIndex((t) => t.id === draggableId);
     if (idx === -1) return;
-    allTasks[idx] = { ...allTasks[idx], status: destination.droppableId };
+    
+    // Auto-sync completed status based on destination column
+    const isMovingToDone = destination.droppableId === "done";
+    const isMovingFromDone = source.droppableId === "done";
+    
+    allTasks[idx] = { 
+      ...allTasks[idx], 
+      status: destination.droppableId,
+      // Auto-mark as complete when moved to Done, unmark when moved away from Done
+      completed: isMovingToDone ? true : (isMovingFromDone ? false : allTasks[idx].completed)
+    };
 
     const colTasks = allTasks
       .filter((t) => t.status === source.droppableId)
@@ -98,7 +108,7 @@ export default function Kanban() {
         const pos = colTasks.findIndex((ct) => ct.id === t.id);
         return { ...t, order: pos };
       }
-      if (t.id === draggableId) return { ...t, status: destination.droppableId };
+      if (t.id === draggableId) return allTasks[idx];
       return t;
     });
     reorderTasks(reordered);

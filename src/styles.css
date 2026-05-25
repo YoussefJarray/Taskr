@@ -6,7 +6,7 @@
 
 /*
  * ── Theme System ──
- * 4 themes: light (default), warm (amber tones), dark (midnight), deep-purple
+ * 8 themes: light, warm, rose, dark, deep-purple, emerald, ocean, sunset
  * Light themes: no `dark` class on html
  * Dark themes: `dark` class on html (activates tailwind dark: variants)
  * `data-theme` attribute controls CSS variable overrides
@@ -37,7 +37,7 @@
   --overlay: rgba(0, 0, 0, 0.45);
 }
 
-/* Warm (light) */
+/* Warm (light) - Amber/Orange tones */
 [data-theme="warm"] {
   --surface: #fefcf5;
   --surface-secondary: #fdf8f0;
@@ -61,7 +61,55 @@
   --overlay: rgba(80, 60, 30, 0.5);
 }
 
-/* Dark (midnight) */
+/* Rose (light) - Pink tones */
+[data-theme="rose"] {
+  --surface: #fef7f7;
+  --surface-secondary: #fdf0f0;
+  --surface-tertiary: #fce8e8;
+  --surface-sidebar: #fef7f7;
+  --surface-card: #fef7f7;
+  --surface-hover: rgba(200, 60, 100, 0.04);
+  --surface-hover-strong: rgba(200, 60, 100, 0.07);
+  --surface-input: #ffffff;
+  --border-subtle: rgba(200, 60, 100, 0.08);
+  --border-default: rgba(200, 60, 100, 0.12);
+  --text-primary: #3d2028;
+  --text-secondary: #8b5a6a;
+  --text-tertiary: #b88a9a;
+  --text-muted: #b88a9a;
+  --accent: #d6336c;
+  --accent-soft: rgba(214, 51, 108, 0.08);
+  --body-bg-from: #fdf0f0;
+  --body-bg-via: #fef7f7;
+  --body-bg-to: #fce8e8;
+  --overlay: rgba(80, 30, 50, 0.45);
+}
+
+/* Ocean (light) - Cyan/Blue tones */
+[data-theme="ocean"] {
+  --surface: #f0f9fc;
+  --surface-secondary: #e0f2fe;
+  --surface-tertiary: #d0e8f9;
+  --surface-sidebar: #f0f9fc;
+  --surface-card: #f0f9fc;
+  --surface-hover: rgba(30, 140, 200, 0.04);
+  --surface-hover-strong: rgba(30, 140, 200, 0.07);
+  --surface-input: #ffffff;
+  --border-subtle: rgba(30, 140, 200, 0.08);
+  --border-default: rgba(30, 140, 200, 0.12);
+  --text-primary: #082f49;
+  --text-secondary: #0c5a7a;
+  --text-tertiary: #0b8fa3;
+  --text-muted: #0b8fa3;
+  --accent: #0284c7;
+  --accent-soft: rgba(2, 132, 199, 0.1);
+  --body-bg-from: #e0f2fe;
+  --body-bg-via: #f0f9fc;
+  --body-bg-to: #d0e8f9;
+  --overlay: rgba(8, 47, 73, 0.45);
+}
+
+/* Dark (midnight) - Deep blue */
 .dark,
 [data-theme="dark"] {
   --surface: #13132b;
@@ -86,31 +134,7 @@
   --overlay: rgba(0, 0, 0, 0.6);
 }
 
-/* Rose (light) */
-[data-theme="rose"] {
-  --surface: #fef7f7;
-  --surface-secondary: #fdf0f0;
-  --surface-tertiary: #fce8e8;
-  --surface-sidebar: #fef7f7;
-  --surface-card: #fef7f7;
-  --surface-hover: rgba(200, 60, 100, 0.04);
-  --surface-hover-strong: rgba(200, 60, 100, 0.07);
-  --surface-input: #ffffff;
-  --border-subtle: rgba(200, 60, 100, 0.08);
-  --border-default: rgba(200, 60, 100, 0.12);
-  --text-primary: #3d2028;
-  --text-secondary: #8b5a6a;
-  --text-tertiary: #b88a9a;
-  --text-muted: #b88a9a;
-  --accent: #d6336c;
-  --accent-soft: rgba(214, 51, 108, 0.08);
-  --body-bg-from: #fdf0f0;
-  --body-bg-via: #fef7f7;
-  --body-bg-to: #fce8e8;
-  --overlay: rgba(80, 30, 50, 0.45);
-}
-
-/* Deep Purple (dark) */
+/* Deep Purple (dark) - Rich purple */
 .dark[data-theme="deep-purple"],
 [data-theme="deep-purple"] {
   --surface: #1e1040;
@@ -135,7 +159,7 @@
   --overlay: rgba(10, 5, 30, 0.65);
 }
 
-/* Emerald (dark) */
+/* Emerald (dark) - Green tones */
 .dark[data-theme="emerald"],
 [data-theme="emerald"] {
   --surface: #0f2a1e;
@@ -158,6 +182,31 @@
   --body-bg-via: #0b2216;
   --body-bg-to: #081a10;
   --overlay: rgba(0, 10, 5, 0.6);
+}
+
+/* Sunset (dark) - Warm oranges and reds */
+.dark[data-theme="sunset"],
+[data-theme="sunset"] {
+  --surface: #2d1f18;
+  --surface-secondary: #241812;
+  --surface-tertiary: #1a110c;
+  --surface-sidebar: #20140f;
+  --surface-card: #2d1f18;
+  --surface-hover: rgba(255, 140, 80, 0.05);
+  --surface-hover-strong: rgba(255, 140, 80, 0.08);
+  --surface-input: #1a110c;
+  --border-subtle: rgba(255, 140, 80, 0.1);
+  --border-default: rgba(255, 140, 80, 0.14);
+  --text-primary: #ffe8d0;
+  --text-secondary: #e6b8a3;
+  --text-tertiary: #cc9080;
+  --text-muted: #e6b8a3;
+  --accent: #ff8c4a;
+  --accent-soft: rgba(255, 140, 74, 0.12);
+  --body-bg-from: #1a110c;
+  --body-bg-via: #241812;
+  --body-bg-to: #1a110c;
+  --overlay: rgba(30, 15, 10, 0.65);
 }
 
 /*
@@ -210,11 +259,17 @@ body {
 [data-theme="rose"] .gradient-text {
   @apply from-pink-500 via-rose-400 to-red-300;
 }
+[data-theme="ocean"] .gradient-text {
+  @apply from-blue-400 via-cyan-400 to-teal-400;
+}
 [data-theme="deep-purple"] .gradient-text {
   @apply from-violet-400 via-purple-300 to-indigo-300;
 }
 [data-theme="emerald"] .gradient-text {
   @apply from-emerald-400 via-green-300 to-teal-300;
+}
+[data-theme="sunset"] .gradient-text {
+  @apply from-orange-400 via-red-400 to-rose-400;
 }
 
 /* ── Animations ── */

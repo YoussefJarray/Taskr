@@ -18,13 +18,25 @@ export default function KanbanCard({ task, isDragging, onEdit }) {
     setCtxMenu({ x: e.clientX, y: e.clientY });
   };
 
+  // Handle toggle with auto-sync status
+  const handleToggleComplete = () => {
+    updateTask({ id: task.id, completed: !task.completed });
+    // Auto-move to Done column when marked as complete
+    if (!task.completed) {
+      updateTask({ id: task.id, status: "done" });
+    } else {
+      // Move back to To Do when unmarked
+      updateTask({ id: task.id, status: "todo" });
+    }
+  };
+
   const ctxItems = [
     { label: "Edit", icon: <BsPencil />, onClick: () => onEdit(task) },
-    { label: task.completed ? "Mark incomplete" : "Mark complete", icon: <BsCheckCircle />, onClick: () => updateTask({ id: task.id, completed: !task.completed }) },
+    { label: task.completed ? "Mark incomplete" : "Mark complete", icon: <BsCheckCircle />, onClick: handleToggleComplete },
     { label: "Move to", icon: <BsArrowRight />, divider: true },
-    { label: "To Do", icon: <BsBookmark />, onClick: () => updateTask({ id: task.id, status: "todo" }) },
-    { label: "In Progress", icon: <BsClock />, onClick: () => updateTask({ id: task.id, status: "in-progress" }) },
-    { label: "Done", icon: <BsCheckCircle />, onClick: () => updateTask({ id: task.id, status: "done" }) },
+    { label: "To Do", icon: <BsBookmark />, onClick: () => updateTask({ id: task.id, status: "todo", completed: false }) },
+    { label: "In Progress", icon: <BsClock />, onClick: () => updateTask({ id: task.id, status: "in-progress", completed: false }) },
+    { label: "Done", icon: <BsCheckCircle />, onClick: () => updateTask({ id: task.id, status: "done", completed: true }) },
     { label: "Priority", icon: <BsFlag />, divider: true },
     { label: "High", icon: <BsArrowUp className="text-rose-400" />, onClick: () => updateTask({ id: task.id, priority: "high" }) },
     { label: "Medium", icon: <BsArrowRight className="text-amber-400" />, onClick: () => updateTask({ id: task.id, priority: "moderate" }) },
@@ -48,14 +60,14 @@ export default function KanbanCard({ task, isDragging, onEdit }) {
               {task.title || "Untitled"}
             </p>
             {task.description && <p className="text-[11px] text-secondary mt-0.5 truncate">{task.description}</p>}
-            {images.length > 0 && (
-              <div className="flex gap-1 mt-1.5">
-                {images.slice(0, 3).map((img) => (
-                  <img key={img.id} src={img.dataUrl} alt="" className="w-7 h-7 rounded-md object-cover border border-subtle" />
-                ))}
-                {images.length > 3 && <span className="text-[10px] text-tertiary self-center">+{images.length - 3}</span>}
-              </div>
-            )}
+             {images.length > 0 && (
+               <div className="flex gap-1.5 mt-2">
+                 {images.slice(0, 3).map((img) => (
+                   <img key={img.id} src={img.dataUrl} alt="" className="w-10 h-10 rounded-md object-cover border border-subtle hover:border-[var(--accent)] transition-all" />
+                 ))}
+                 {images.length > 3 && <span className="text-[10px] text-tertiary self-center">+{images.length - 3}</span>}
+               </div>
+             )}
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); setCtxMenu({ x: e.currentTarget.getBoundingClientRect().right - 130, y: e.currentTarget.getBoundingClientRect().bottom }); }}

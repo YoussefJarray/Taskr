@@ -17,6 +17,18 @@ export default function TaskCard({ task, onToggle, onDelete }) {
   const col = collections.find((c) => c.id === task.collectionId);
   const images = task.images || [];
 
+  // Handle toggle with auto-sync to kanban status
+  const handleToggle = (id) => {
+    onToggle(id);
+    // Auto-move to Done column when marked as complete
+    if (!task.completed) {
+      updateTask({ id, status: "done" });
+    } else {
+      // Move back to To Do when unmarked
+      updateTask({ id, status: "todo" });
+    }
+  };
+
   const handleContext = (e) => {
     e.preventDefault();
     setCtxMenu({ x: e.clientX, y: e.clientY });
@@ -24,7 +36,7 @@ export default function TaskCard({ task, onToggle, onDelete }) {
 
   const ctxItems = [
     { label: "Edit", icon: <BsPencil />, onClick: () => setEditing(true) },
-    { label: task.completed ? "Mark incomplete" : "Mark complete", icon: <BsCheckCircle />, onClick: () => onToggle(task.id) },
+    { label: task.completed ? "Mark incomplete" : "Mark complete", icon: <BsCheckCircle />, onClick: () => handleToggle(task.id) },
     { label: "Change priority", icon: <BsFlag />, divider: true },
     { label: "High", icon: <BsArrowUp className="text-rose-400" />, onClick: () => updateTask({ id: task.id, priority: "high" }) },
     { label: "Medium", icon: <BsArrowRight className="text-amber-400" />, onClick: () => updateTask({ id: task.id, priority: "moderate" }) },
@@ -32,7 +44,7 @@ export default function TaskCard({ task, onToggle, onDelete }) {
     { label: "Change status", icon: <BsClock />, divider: true },
     { label: "To Do", icon: <BsBookmark />, onClick: () => updateTask({ id: task.id, status: "todo" }) },
     { label: "In Progress", icon: <BsClock />, onClick: () => updateTask({ id: task.id, status: "in-progress" }) },
-    { label: "Done", icon: <BsCheckCircle />, onClick: () => updateTask({ id: task.id, status: "done" }) },
+    { label: "Done", icon: <BsCheckCircle />, onClick: () => updateTask({ id: task.id, status: "done", completed: true }) },
     { label: "Delete", icon: <BsTrash />, divider: true, danger: true, onClick: () => onDelete(task.id) },
   ];
 
@@ -46,15 +58,15 @@ export default function TaskCard({ task, onToggle, onDelete }) {
             : "bg-surface-card border-subtle hover:border-[var(--accent)]/30"
         }`}
       >
-        {/* Checkbox */}
-        <button
-          onClick={() => onToggle(task.id)}
-          className={`mt-0.5 w-[18px] h-[18px] rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 ${
-            task.completed ? "bg-emerald-500 border-emerald-500" : "border-gray-300 dark:border-gray-600 hover:border-[var(--accent)]"
-          }`}
-        >
-          {task.completed && <RxCheck className="text-white" style={{ fontSize: 11 }} />}
-        </button>
+         {/* Checkbox */}
+         <button
+           onClick={() => handleToggle(task.id)}
+           className={`mt-0.5 w-[18px] h-[18px] rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-150 ${
+             task.completed ? "bg-emerald-500 border-emerald-500" : "border-gray-300 dark:border-gray-600 hover:border-[var(--accent)]"
+           }`}
+         >
+           {task.completed && <RxCheck className="text-white" style={{ fontSize: 11 }} />}
+         </button>
 
         {/* Content */}
         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setEditing(true)} onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); setCtxMenu({ x: e.clientX, y: e.clientY }); }}>
@@ -77,20 +89,20 @@ export default function TaskCard({ task, onToggle, onDelete }) {
           {task.description && (
             <p className={`text-xs mt-0.5 ${task.completed ? "line-through text-tertiary" : "text-secondary"}`}>{task.description}</p>
           )}
-          {images.length > 0 && (
-            <div className="mt-1.5">
-              <button onClick={(e) => { e.stopPropagation(); setShowImages(!showImages); }} className="flex items-center gap-1 text-[10px] text-tertiary hover:text-[var(--accent)] transition-colors">
-                <BsImage /> {images.length} image{images.length > 1 ? "s" : ""}
-              </button>
-              {showImages && (
-                <div className="flex flex-wrap gap-1.5 mt-1.5" onClick={(e) => e.stopPropagation()}>
-                  {images.map((img) => (
-                    <img key={img.id} src={img.dataUrl} alt="" className="w-14 h-14 rounded-lg object-cover border border-subtle" />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+           {images.length > 0 && (
+             <div className="mt-2">
+               <button onClick={(e) => { e.stopPropagation(); setShowImages(!showImages); }} className="flex items-center gap-1 text-[10px] text-tertiary hover:text-[var(--accent)] transition-colors">
+                 <BsImage /> {images.length} image{images.length > 1 ? "s" : ""}
+               </button>
+               {showImages && (
+                 <div className="flex flex-wrap gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                   {images.map((img) => (
+                     <img key={img.id} src={img.dataUrl} alt="" className="w-20 h-20 rounded-lg object-cover border border-subtle hover:border-[var(--accent)] transition-all" />
+                   ))}
+                 </div>
+               )}
+             </div>
+           )}
         </div>
 
         {/* Actions */}
