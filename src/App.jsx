@@ -1,90 +1,66 @@
-import { useEffect, useState } from "react";
-import { CgDarkMode } from "react-icons/cg";
-import "./styles.css";
-import { DarkModeToggle } from "./components/darkmodetoggle";
-import { NewToDoForm } from "./components/NewToDoForm";
-import { TodoList } from "./components/TodoList";
-import { FooterInfo } from "./components/FooterInfo";
+import { useState, useEffect, useRef } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { useApp } from "./context/AppContext";
+import Sidebar from "./components/layout/Sidebar";
+import FAB from "./components/ui/FAB";
+import CollectionFilter from "./components/tasks/CollectionFilter";
+import Confetti from "./components/ui/Confetti";
+import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Dashboard";
+import Tasks from "./pages/Tasks";
+import Kanban from "./pages/Kanban";
+import MoodBoard from "./pages/MoodBoard";
+import Settings from "./pages/Settings";
 
-const todosFromStorage = JSON.parse(localStorage.getItem("todos-list") || "[]");
-const isDark = JSON.parse(localStorage.getItem("isDark") || false);
+const FILTER_ROUTES = ["/tasks", "/kanban"];
 
-export default function App() {
-  const [todos, setTodos] = useState(todosFromStorage);
-  const [darkMode, setDarkMode] = useState(isDark);
-
-  function toggleTodo(id, completed) {
-    setTodos(currentList => {
-      return currentList.map(todo => {
-        if (id === todo.id) {
-          return { ...todo, completed: !todo.completed };
-        }
-        return todo;
-      });
-    });
-  }
-
-  function addTodo(newItem, newDescription, newPriority) {
-    if (newItem != "") {
-      setTodos(currentList => {
-        return [
-          ...currentList,
-          {
-            id: crypto.randomUUID(),
-            title: newItem,
-            description: newDescription,
-            priority: newPriority,
-            completed: false,
-          },
-        ];
-      });
-    }
-  }
-
-  function deleteTodo(id) {
-    setTodos(currentList => {
-      return currentList.filter(todo => todo.id !== id);
-    });
-  }
-
-  useEffect(() => {
-    if (todosFromStorage!=[]) {
-      setTodos(todosFromStorage);
-    }
-    if(isDark=="true"){
-      setDarkMode(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if(todos!=null){
-      localStorage.setItem("todos-list", JSON.stringify(todos));
-    }
-  }, [todos]);
-
-  useEffect(() => {
-    localStorage.setItem("isDark", JSON.stringify(darkMode));
-  }, [darkMode]);
+function AppLayout({ children }) {
+  const { collectionFilter, setCollectionFilter } = useApp();
+  const location = useLocation();
+  const showFilter = FILTER_ROUTES.includes(location.pathname);
 
   return (
-    <div className={`max-h-screen ${darkMode ? "dark" : "" }`}>
-      <section className="bg-slate-100 dark:bg-gray-900 min-h-screen transition-all duration-300">
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="text-center text-5xl mx-10 my-10 font-black bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-200 via-violet-600 to-sky-900 bg-clip-text text-transparent duration-700 cursor-pointer select-none">
-            Taskr
-          </h1>
-          <a onClick={() => setDarkMode(!darkMode)}>
-            <DarkModeToggle />
-          </a>
-        </div>
-        <NewToDoForm addTask={addTodo} />
-        <TodoList
-          todos={todos}
-          toggleTodo={toggleTodo}
-          deleteTodo={deleteTodo}
-        />
-        <FooterInfo/>
-      </section>
+    <div className="flex min-h-screen bg-gradient-to-br from-[var(--body-bg-from)] via-[var(--body-bg-via)] to-[var(--body-bg-to)] transition-colors duration-500">
+      <Sidebar />
+      <main className="flex-1 ml-56 p-5 overflow-y-auto max-h-screen relative">
+        {showFilter && (
+          <div className="mb-5">
+            <CollectionFilter value={collectionFilter} onChange={setCollectionFilter} />
+          </div>
+        )}
+        {children}
+        <FAB />
+      </main>
     </div>
+  );
+}
+
+export default function App() {
+  const { tasks } = useApp();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const prevAllDone = useRef(false);
+
+  useEffect(() => {
+    const count = tasks.length;
+    const allDone = count > 0 && tasks.every((t) => t.completed);
+    if (allDone && !prevAllDone.current) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 4000);
+    }
+    prevAllDone.current = allDone;
+  }, [tasks]);
+
+  return (
+    <>
+      {showConfetti && <Confetti count={120} />}
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/app" element={<AppLayout><Dashboard /></AppLayout>} />
+        <Route path="/tasks" element={<AppLayout><Tasks /></AppLayout>} />
+        <Route path="/kanban" element={<AppLayout><Kanban /></AppLayout>} />
+        <Route path="/moodboard" element={<AppLayout><MoodBoard /></AppLayout>} />
+        <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
+      </Routes>
+    </>
   );
 }
